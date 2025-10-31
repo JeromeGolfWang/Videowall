@@ -1,64 +1,60 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Grok Imagine — Video Wall</title>
-<style>
-:root {
---gap: 12px;
---min: 240px; /* min card width; tweak for density */
+loading = true;
+const next = items.slice(cursor, cursor + CONFIG.BATCH);
+cursor += next.length;
+if (!next.length) { loading = false; return; }
+// we’re not fetching metadata here; just render
+next.forEach(addCard);
+loading = false;
 }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; background:#0b0c10; color:#e8eaed; }
-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(6px); background: rgba(11,12,16,0.7); padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-h1 { margin: 0; font-size: 18px; }
-.row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-input[type="text"], textarea { width: 100%; background:#15171d; color:#e8eaed; border:1px solid #2a2d36; border-radius:10px; padding:10px 12px; }
-button { background:#2b6ef5; color:white; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
-button:disabled { opacity: .6; cursor: not-allowed; }
 
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr)); gap: var(--gap); padding: var(--gap); }
-.card { background:#111319; border:1px solid #22242d; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
-.media { position: relative; background:#0a0b0f; aspect-ratio: 16/9; display:block; }
-.media video, .media img { position:absolute; inset:0; width:100%; height:100%; object-fit: cover; }
-.info { padding: 10px 12px; font-size: 13px; color:#b9c0ca; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.info a { color:#8ab4f8; text-decoration: none; }
-.footer { text-align:center; padding: 16px; color:#7f8895; }
-.pill { font-size: 11px; padding: 4px 8px; border-radius:999px; background:#1a1d25; border: 1px solid #2a2d36; }
-</style>
-</head>
-<body>
-<header>
-<h1>Grok Imagine — Video Wall</h1>
-<div class="row">
-<input id="worker" type="text" placeholder="Worker base URL (e.g. https://your-worker.workers.dev)" />
-<button id="save">Use Worker</button>
-</div>
-<div class="row">
-<textarea id="paste" rows="3" placeholder="Paste Grok post URLs (one per line)"></textarea>
-<button id="add">Add Links</button>
-<button id="clear">Clear</button>
-<span class="pill" id="count">0 items</span>
-</div>
-</header>
+function addCard(item){
+const card = document.createElement('article');
+card.className = 'card';
+const media = document.createElement('div');
+media.className = 'media';
 
 
-<main class="grid" id="grid"></main>
-<div class="footer" id="status">Ready.</div>
+if (item.poster){
+const img = document.createElement('img');
+img.src = item.poster; media.appendChild(img);
+}
 
 
-<script>
-// ======= CONFIG =======
-const DEFAULTS = {
-WORKER_BASE: localStorage.getItem('worker_base') || '',
-BATCH: 8, // scrape N links at a time
-CONCURRENCY: 4, // parallel requests per batch
-AUTOPLAY: true,
-MUTED: true,
-};
+const info = document.createElement('div');
+info.className = 'info';
+info.textContent = item.title || filename(item.src);
 
 
-const grid = document.getElementById('grid');
+card.appendChild(media); card.appendChild(info); grid.appendChild(card);
+card.dataset.src = item.src; card.dataset.poster = item.poster || '';
+io.observe(card);
+}
+
+
+const io = new IntersectionObserver((entries) => {
+for (const e of entries){ if (!e.isIntersecting) continue; io.unobserve(e.target); mountVideo(e.target); }
+}, { rootMargin: '1200px 0px' });
+
+
+function mountVideo(card){
+const media = card.querySelector('.media');
+const v = document.createElement('video');
+v.setAttribute('playsinline',''); v.setAttribute('preload','none'); v.controls = true;
+if (CONFIG.AUTOPLAY) v.autoplay = true; if (CONFIG.MUTED) v.muted = true;
+const src = document.createElement('source'); src.src = card.dataset.src; src.type = 'video/mp4';
+v.appendChild(src); media.innerHTML = ''; media.appendChild(v);
+}
+
+
+window.addEventListener('scroll', () => {
+const nearBottom = window.innerHeight + window.scrollY > document.body.offsetHeight - 1600;
+if (nearBottom) enqueue();
+});
+
+
+function filename(p){ try{ return decodeURIComponent(p.split('/').pop()); } catch{ return p; } }
+</script>
+</body>
 </html>
