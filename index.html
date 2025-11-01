@@ -19,130 +19,109 @@
       border-radius:12px;
       overflow:hidden;
       position:relative;
+      background:#111;
     }
-    video {
+    .video-card video {
       width:100%;
-      height:0;
-      padding-bottom:177.78%; /* 9:16 */
+      aspect-ratio: 9/16;
       object-fit:cover;
       display:block;
       background:#111;
     }
-    .play-overlay {
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:rgba(0,0,0,0.7); color:white; padding:1rem; border-radius:8px;
-      font-size:0.9rem; cursor:pointer; display:none;
+    .error-msg {
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      color:#ff4444;
+      padding:1rem;
+      text-align:center;
+      font-size:0.85rem;
+      display:none;
     }
-    @media (max-width:600px) { .gallery { grid-template-columns:1fr; } }
+    .video-card.error .error-msg {
+      display:block;
+    }
+    @media (max-width:600px) { 
+      .gallery { grid-template-columns:1fr; } 
+    }
   </style>
 </head>
 <body>
 
-  <section class="gallery">
+  <section class="gallery" id="gallery"></section>
 
-    <!-- DEBUG: Only this one has fallback text -->
-    <div class="video-card">
-      <video autoplay muted loop playsinline preload="metadata">
-        <source src="videos/grok-video-fa22a5af-cdcf-4c31-8b56-3bc8cc3bf43d.mp4" type="video/mp4">
-        <p style="color:red; padding:1rem; text-align:center; background:#111;">
-          FAILED: videos/grok-video-fa22a5af-cdcf-4c31-8b56-3bc8cc3bf43d.mp4 not found or corrupted
-        </p>a
-      </video>
-    </div>
-
-    <!-- VIDEO 1 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-fa22a5af-cdcf-4c31-8b56-3bc8cc3bf43d.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 2 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-4e398da6-c4be-4aba-b028-c391a5b08990.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 3 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-d34887ea-b3ec-473b-a6c3-eebc1d9349c1.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 4 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-8d0a6b79-d7f4-47d8-bcbd-ef2a80550bd6.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 5 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-d743a6ad-1f23-4dde-9fed-a915392b09c2.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 6 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-8e9bd627-7797-4321-8c8d-ed1430914230.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 7 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-d3e75c66-46f5-4475-b569-cc97477f1670.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 8 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-48f7a41f-8838-4136-bdfa-ae39938c186f.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 9 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-ce1e4ffe-587b-4430-a7eb-b483be5b3967.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 10 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/grok-video-84a1673c-2953-4d7a-b1d3-91b17f1ff7c0.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <!-- VIDEO 12 -->
-    <div class="video-card">
-      <video autoplay muted loop preload="auto" playsinline>
-        <source src="videos/video12.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    </section>
-
-  <!-- NUCLEAR AUTOPLAY FIX -->
   <script>
-    // Wait 100ms, then force ALL videos to play
-    setTimeout(() => {
-      document.querySelectorAll('video').forEach(video => {
-        video.muted = true;
-        video.loop = true;
-        video.play();
-      });
-    }, 100);
+    const videos = [
+      'videos/grok-video-fa22a5af-cdcf-4c31-8b56-3bc8cc3bf43d.mp4',
+      'videos/grok-video-4e398da6-c4be-4aba-b028-c391a5b08990.mp4',
+      'videos/grok-video-d34887ea-b3ec-473b-a6c3-eebc1d9349c1.mp4',
+      'videos/grok-video-8d0a6b79-d7f4-47d8-bcbd-ef2a80550bd6.mp4',
+      'videos/grok-video-d743a6ad-1f23-4dde-9fed-a915392b09c2.mp4',
+      'videos/grok-video-8e9bd627-7797-4321-8c8d-ed1430914230.mp4',
+      'videos/grok-video-d3e75c66-46f5-4475-b569-cc97477f1670.mp4',
+      'videos/grok-video-48f7a41f-8838-4136-bdfa-ae39938c186f.mp4',
+      'videos/grok-video-ce1e4ffe-587b-4430-a7eb-b483be5b3967.mp4',
+      'videos/grok-video-84a1673c-2953-4d7a-b1d3-91b17f1ff7c0.mp4',
+      'videos/video12.mp4'
+    ];
 
-    // Also unlock on ANY click
-    document.addEventListener('click', () => {
-      document.querySelectorAll('video').forEach(video => video.play());
-    }, { once: true });
+    const gallery = document.getElementById('gallery');
+
+    videos.forEach((src, index) => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      
+      const video = document.createElement('video');
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.setAttribute('playsinline', '');
+      video.preload = 'auto';
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'error-msg';
+      errorMsg.textContent = `Failed to load: ${src}`;
+      
+      video.addEventListener('loadeddata', () => {
+        video.play().catch(err => {
+          console.error(`Autoplay failed for ${src}:`, err);
+        });
+      });
+      
+      video.addEventListener('error', () => {
+        card.classList.add('error');
+        console.error(`Failed to load video: ${src}`);
+      });
+      
+      video.src = src;
+      
+      card.appendChild(video);
+      card.appendChild(errorMsg);
+      gallery.appendChild(card);
+    });
+
+    // Fallback: attempt to play all videos after page interaction
+    let played = false;
+    const playAll = () => {
+      if (played) return;
+      played = true;
+      document.querySelectorAll('video').forEach(v => {
+        v.play().catch(() => {});
+      });
+    };
+    
+    document.addEventListener('click', playAll, { once: true });
+    document.addEventListener('touchstart', playAll, { once: true });
+    
+    // Final attempt after everything loads
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.querySelectorAll('video').forEach(v => {
+          v.play().catch(() => {});
+        });
+      }, 500);
+    });
   </script>
 </body>
+</html>
