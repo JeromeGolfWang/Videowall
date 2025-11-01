@@ -127,50 +127,22 @@
       </video>
     </div>
 
-  </section>
+    </section>
 
- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const videos = document.querySelectorAll('video');
-      videos.forEach((video, i) => {
-        video.addEventListener('error', (e) => {
-          console.error(`Video ${i+1} load error:`, e.target.error);
-          console.log('Tried to load:', e.target.currentSrc);
-        });
-
-        const tryPlay = () => {
-          video.play().catch(err => {
-            console.warn(`Autoplay blocked (video ${i+1}):`, err.message);
-            // Show overlay to unlock
-            let overlay = video.parentElement.querySelector('.play-overlay');
-            if (!overlay) {
-              overlay = document.createElement('div');
-              overlay.className = 'play-overlay';
-              overlay.innerHTML = 'Tap to Play';
-              overlay.onclick = () => { video.play(); overlay.remove(); };
-              video.parentElement.appendChild(overlay);
-            }
-            overlay.style.display = 'block';
-          });
-        };
-
-        // Try immediately
-        tryPlay();
-
-        // Retry on interaction
-        ['click', 'touchstart', 'keydown'].forEach(ev =>
-          document.addEventListener(ev, tryPlay, { once: true })
-        );
-
-        // Retry when in view
-        if ('IntersectionObserver' in window) {
-          new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) tryPlay();
-          }).observe(video);
-        }
+  <!-- NUCLEAR AUTOPLAY FIX -->
+  <script>
+    // Wait 100ms, then force ALL videos to play
+    setTimeout(() => {
+      document.querySelectorAll('video').forEach(video => {
+        video.muted = true;
+        video.loop = true;
+        video.play();
       });
-    });
-  </script>
+    }, 100);
 
+    // Also unlock on ANY click
+    document.addEventListener('click', () => {
+      document.querySelectorAll('video').forEach(video => video.play());
+    }, { once: true });
+  </script>
 </body>
-</html>
