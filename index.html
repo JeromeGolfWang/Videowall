@@ -6,28 +6,60 @@
   <title>Grok Videos</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:#000; font-family:system-ui,sans-serif; }
+    body { background:#000; font-family:system-ui,sans-serif; padding-top:120px; }
     
-    .controls {
+    .header {
       position:fixed;
-      top:1rem;
-      right:1rem;
-      background:rgba(255,255,255,0.1);
-      backdrop-filter:blur(10px);
-      padding:1rem;
-      border-radius:8px;
-      color:white;
+      top:0;
+      left:0;
+      right:0;
+      background:#111;
+      border-bottom:1px solid #333;
+      padding:1.5rem;
       z-index:1000;
+    }
+    .header h1 {
+      color:white;
+      font-size:1.5rem;
+      font-weight:400;
+      text-align:center;
+      margin-bottom:1rem;
+    }
+    .controls {
       display:flex;
       align-items:center;
-      gap:0.75rem;
+      justify-content:center;
+      gap:1rem;
+      color:white;
     }
     .controls label {
       font-size:0.9rem;
-      white-space:nowrap;
     }
     .controls input[type="range"] {
-      width:150px;
+      width:200px;
+      height:6px;
+      -webkit-appearance:none;
+      appearance:none;
+      background:#333;
+      border-radius:3px;
+      outline:none;
+    }
+    .controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none;
+      appearance:none;
+      width:18px;
+      height:18px;
+      background:white;
+      border-radius:50%;
+      cursor:pointer;
+    }
+    .controls input[type="range"]::-moz-range-thumb {
+      width:18px;
+      height:18px;
+      background:white;
+      border-radius:50%;
+      cursor:pointer;
+      border:none;
     }
     .controls .value {
       font-weight:bold;
@@ -40,6 +72,7 @@
       padding:1rem;
       max-width:1400px;
       margin:0 auto;
+      transition:grid-template-columns 0.3s ease;
     }
     .video-card {
       border-radius:12px;
@@ -53,8 +86,6 @@
       object-fit:cover;
       display:block;
       background:#111;
-      transform-origin:center;
-      transition:transform 0.3s ease;
     }
     .error-msg {
       position:absolute;
@@ -77,10 +108,13 @@
 </head>
 <body>
 
-  <div class="controls">
-    <label for="sizeSlider">Video Size:</label>
-    <input type="range" id="sizeSlider" min="30" max="100" value="100" step="5">
-    <span class="value" id="sizeValue">100%</span>
+  <div class="header">
+    <h1>Create with a blank slate.</h1>
+    <div class="controls">
+      <label for="sizeSlider">Video Size:</label>
+      <input type="range" id="sizeSlider" min="30" max="100" value="100" step="5">
+      <span class="value" id="sizeValue">100%</span>
+    </div>
   </div>
 
   <section class="gallery" id="gallery"></section>
@@ -97,20 +131,30 @@
       'videos/grok-video-48f7a41f-8838-4136-bdfa-ae39938c186f.mp4',
       'videos/grok-video-ce1e4ffe-587b-4430-a7eb-b483be5b3967.mp4',
       'videos/grok-video-84a1673c-2953-4d7a-b1d3-91b17f1ff7c0.mp4',
-      'videos/video12.mp4'
+      'videos/grok-video-c598477e-f62a-472d-a02c-a0a364362e3e.mp4',
+      'videos/grok-video-88c4cd17-387b-47b3-8c9c-e2fb28d04ffe.mp4',
+      'videos/grok-video-c4bc7aa1-b1cc-4f07-aeb6-240b3c677ba1.mp4',
+      'videos/grok-video-208d5ddc-06f9-4ac6-bb62-4266269b4136.mp4',
+      'videos/grok-video-bc9a7ef6-f226-4a5f-8762-54028e494afc.mp4',
+      'videos/grok-video-520d7680-1f2b-477c-b956-9a36f12c05cc.mp4',
+      'videos/grok-video-bbd24057-d86e-4aed-bc95-ac9d2518346a.mp4',
+      'videos/grok-video-523b87cc-1d51-40d2-b03f-1946aa2eeebb-0.mp4',
+      'videos/grok-video-b1f58759-6326-4133-acdd-061e1724ce53.mp4',
+      'videos/grok-video-734ab46b-f28c-490b-bda1-57ee51af2250.mp4',
+      'videos/grok-video-1945508d-2688-469b-af83-432f1e8ee475.mp4',
+      'videos/grok-video-13029e5d-ea67-47d5-b56e-501c8f7e76e3.mp4',
     ];
 
     const gallery = document.getElementById('gallery');
     const sizeSlider = document.getElementById('sizeSlider');
     const sizeValue = document.getElementById('sizeValue');
 
-    // Update video sizes
+    // Update video sizes by changing grid column width
     sizeSlider.addEventListener('input', (e) => {
-      const scale = e.target.value / 100;
-      sizeValue.textContent = e.target.value + '%';
-      document.querySelectorAll('video').forEach(v => {
-        v.style.transform = `scale(${scale})`;
-      });
+      const size = e.target.value;
+      const minSize = Math.floor(280 * (size / 100));
+      sizeValue.textContent = size + '%';
+      gallery.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
     });
 
     videos.forEach((src, index) => {
