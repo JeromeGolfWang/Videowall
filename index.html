@@ -65,15 +65,20 @@
       font-weight:bold;
       min-width:45px;
     }
+
+    /* UPDATED GALLERY – using CSS vars for dynamic width + gap */
     .gallery {
+      --cell-min: 280px;
+      --gap: 16px;
       display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-      gap:1rem;
-      padding:1rem;
+      grid-template-columns:repeat(auto-fit, minmax(var(--cell-min), 1fr));
+      gap:var(--gap);
+      padding:var(--gap);
       max-width:1400px;
       margin:0 auto;
       transition:grid-template-columns 0.3s ease;
     }
+
     .video-card {
       border-radius:12px;
       overflow:hidden;
@@ -167,12 +172,16 @@
     const sizeSlider = document.getElementById('sizeSlider');
     const sizeValue = document.getElementById('sizeValue');
 
-    // Update video sizes by changing grid column width
+    // UPDATED SLIDER: updates CSS vars so side + vertical spacing always match
     sizeSlider.addEventListener('input', (e) => {
-      const size = e.target.value;
-      const minSize = Math.floor(280 * (size / 100));
-      sizeValue.textContent = size + '%';
-      gallery.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
+      const pct = Number(e.target.value);
+      sizeValue.textContent = pct + '%';
+
+      const minSize = Math.floor(280 * (pct / 100));
+      const gap = Math.max(8, Math.min(28, Math.round(minSize * 0.04)));
+
+      gallery.style.setProperty('--cell-min', `${minSize}px`);
+      gallery.style.setProperty('--gap', `${gap}px`);
     });
 
     videos.forEach((src, index) => {
