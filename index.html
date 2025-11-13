@@ -161,7 +161,8 @@
     sizeSlider.addEventListener('input', (e) => {
       const size = e.target.value;
       const minSize = Math.floor(280 * (size / 100));
-      const rowGap = Math.floor(16 * (size / 100)); // Scale row gap proportionally
+      // Use a smaller multiplier for row gap to keep it tighter at small sizes
+      const rowGap = Math.max(2, Math.floor(8 * (size / 100))); // Min 2px, scales with size
       sizeValue.textContent = size + '%';
       gallery.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
       gallery.style.rowGap = `${rowGap}px`;
