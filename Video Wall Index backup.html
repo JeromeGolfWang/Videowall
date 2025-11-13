@@ -79,7 +79,6 @@
       overflow:hidden;
       position:relative;
       background:#111;
-      min-height:385px;
     }
     .video-card video {
       width:100%;
@@ -110,7 +109,7 @@
 <body>
 
   <div class="header">
-    <h1>Blank Slate Imagination (no prompt imagination in negative space).</h1>
+    <h1>Blank Slate Imagination (Windows of Dopamine).</h1>
     <div class="controls">
       <label for="sizeSlider">Video Size:</label>
       <input type="range" id="sizeSlider" min="30" max="100" value="100" step="5">
@@ -149,14 +148,14 @@
       'videos/grok-video-734ab46b-f28c-490b-bda1-57ee51af2250.mp4',
       'videos/grok-video-3444bb24-f7f7-459e-ac73-b8d4c58bd50b.mp4',
       'videos/grok-video-b75f9277-8cea-4c30-bc69-cbe9eba6ce41.mp4',
-      'videos/grok-video-e42f6385-7704-4d62-b6e5-b6a170ded3ad.mp4'
+      'videos/grok-video-e42f6385-7704-4d62-b6e5-b6a170ded3ad.mp4',
     ];
 
     const gallery = document.getElementById('gallery');
     const sizeSlider = document.getElementById('sizeSlider');
     const sizeValue = document.getElementById('sizeValue');
 
-    // Update video sizes
+    // Update video sizes by changing grid column width
     sizeSlider.addEventListener('input', (e) => {
       const size = e.target.value;
       const minSize = Math.floor(280 * (size / 100));
@@ -164,31 +163,7 @@
       gallery.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
     });
 
-    // Intersection Observer for lazy loading
-    const observerOptions = {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0
-    };
-
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const video = entry.target;
-        
-        if (entry.isIntersecting) {
-          if (!video.src) {
-            video.src = video.dataset.src;
-            video.load();
-          }
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      });
-    }, observerOptions);
-
-    // Create video cards
-    videos.forEach((src) => {
+    videos.forEach((src, index) => {
       const card = document.createElement('div');
       card.className = 'video-card';
       
@@ -197,42 +172,51 @@
       video.loop = true;
       video.playsInline = true;
       video.setAttribute('playsinline', '');
-      video.preload = 'none';
-      video.dataset.src = src;
+      video.preload = 'auto';
       
       const errorMsg = document.createElement('div');
       errorMsg.className = 'error-msg';
-      errorMsg.textContent = `Failed to load video`;
+      errorMsg.textContent = `Failed to load: ${src}`;
+      
+      video.addEventListener('loadeddata', () => {
+        video.play().catch(err => {
+          console.error(`Autoplay failed for ${src}:`, err);
+        });
+      });
       
       video.addEventListener('error', () => {
         card.classList.add('error');
         console.error(`Failed to load video: ${src}`);
       });
       
-      videoObserver.observe(video);
+      video.src = src;
       
       card.appendChild(video);
       card.appendChild(errorMsg);
       gallery.appendChild(card);
     });
 
-    // Enable playback on user interaction
-    let interacted = false;
-    const enablePlayback = () => {
-      if (interacted) return;
-      interacted = true;
-      
+    // Fallback: attempt to play all videos after page interaction
+    let played = false;
+    const playAll = () => {
+      if (played) return;
+      played = true;
       document.querySelectorAll('video').forEach(v => {
-        const rect = v.getBoundingClientRect();
-        const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
-        if (inViewport && v.src) {
-          v.play().catch(() => {});
-        }
+        v.play().catch(() => {});
       });
     };
     
-    document.addEventListener('click', enablePlayback, { once: true });
-    document.addEventListener('touchstart', enablePlayback, { once: true });
+    document.addEventListener('click', playAll, { once: true });
+    document.addEventListener('touchstart', playAll, { once: true });
+    
+    // Final attempt after everything loads
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.querySelectorAll('video').forEach(v => {
+          v.play().catch(() => {});
+        });
+      }, 500);
+    });
   </script>
 </body>
 </html>
